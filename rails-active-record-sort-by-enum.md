@@ -18,17 +18,18 @@ class JobSubmission < ApplicationRecord
 end
 ```
 
-It is highly recommended to use a Hash to explicitly define the enum values – otherwise Rails will use the index of the enum value when storing it to the database.
-If you were were to change the order or remove options, you would break the reference mapping.
+Rất nên sử dụng Hash để xác định rõ ràng các giá trị enum – nếu không Rails sẽ sử dụng chỉ mục của giá trị enum khi lưu trữ nó vào cơ sở dữ liệu.
 
-Out of the box, you can sort by the enum value like any other column and it will use the value.
+Nếu bạn thay đổi thứ tự hoặc loại bỏ các tùy chọn, bạn sẽ phá vỡ ánh xạ tham chiếu.
+
+Ngoài hộp, bạn có thể sắp xếp theo giá trị enum giống như bất kỳ cột nào khác và nó sẽ sử dụng giá trị.
 
 ```ruby
 JobSubmission.all.order(:status)
 # "SELECT \"job_submissions\".* FROM \"job_submissions\" ORDER BY \"job_submissions\".\"status\" ASC
 ```
 
-But what if you wanted sort the results differently? You might be tempted to do something like this:
+Nhưng nếu bạn muốn thay đổi thứ tự kết quả khác đi? Bạn có thể thay đổi giá trị enum như kiểu thế này:
 
 ```ruby
 class JobSubmission < ApplicationRecord
@@ -49,19 +50,20 @@ end
 JobSubmission.all.sort(&:status_sort_value)
 ```
 
-Instead you can use the in_order_of to specify the sort order of the enum values. And the best part? The sorting will happen in SQL (using a CASE command under-the-hood).\
-Thay vào đó, bạn có thể sử dụng `in_order_of` để order theo enums. Và điều gì sẽ xảy ra? Sorting sẽ thực hiện trong SQL ( sử dụng CASE command ).
+Thay vì đó, bạn có thể dùng `in_order_of` để thay đổi thứ tự order theo giá trị của enum.\
+Điều tuyệt vời là gì? Việc sắp xếp thứ tự thực hiện trong SQL (sử dụng command CASE).
 
 ## Usage
 
-To sort the JobSubmission records by the status enum value in a different order, you can use:
+Để sort bảng JobSubmission theo status enum với thứ tự khác, bạn có thể dùng:
 
 ```ruby
 JobSubmission.all.in_order_of(:status, %w[accepted hold submitted draft rejected canceled])
 ```
-The first argument is the column to sort by and the second argument is an ordered array of values.
 
-The SQL generated for this query will be:
+Giá trị đầu là tên của cột cần sort, và giá trị thứ 2 là thứ tự mong muốn.
+
+SQL query được sinh ra sẽ như thế này:
 
 ```sql
 SELECT "job_submissions".*
@@ -77,7 +79,8 @@ ORDER BY
     ELSE 6
   END ASC
 ```
-You can also add additional sorting to the relation. For instance, you would probably want to sort records by the status and then maybe alphabetically by the name column to break ties.
+
+Bạn có thể thêm điều kiện sort.
 
 ```ruby
 JobSubmission.all
